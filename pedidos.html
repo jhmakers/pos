@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="estilos.css?v=11">
+<script src="tema.js?v=8" defer></script>
+</head>
+
+<body onload="if(new URLSearchParams(location.search).get('desde')==='escaner'){iniciarPagoEscaneado()}else{cargarPedido()}">
+
+<header>
+<h1>🛒 Generar Pedido</h1>
+</header>
+
+<div class="card">
+
+<h2 id="tituloSeleccionPedido">Producto seleccionado</h2>
+
+<div id="productoPedido"></div>
+
+<label for="cliente">Nombre del cliente</label>
+<input id="cliente" placeholder="Nombre completo" autocomplete="name">
+
+<label for="dniCliente">Número de DNI</label>
+<input id="dniCliente" type="text" inputmode="numeric" maxlength="8" pattern="[0-9]{8}" placeholder="8 dígitos" autocomplete="off" title="DNI de 8 dígitos">
+
+<label for="telefonoCliente">Teléfono del cliente</label>
+<input id="telefonoCliente" type="tel" inputmode="tel" maxlength="20" placeholder="Ejemplo: 999 999 999" autocomplete="tel">
+
+<label for="direccionCliente">Dirección del cliente</label>
+<input id="direccionCliente" type="text" maxlength="200" placeholder="Calle, número y referencia" autocomplete="street-address">
+
+<div id="totalPedido" style="font-weight:bold">Total: S/. 0</div>
+<p id="avisoPagoEscaneado" hidden></p>
+
+<label>Mensaje del pedido</label>
+<textarea id="mensajePedido" placeholder="Ejemplo: Entregar con tarjeta de cumpleaños"></textarea>
+
+
+<button type="button" onclick="vistaPreviaBoletaSupermercado()">👁 Ver vista previa de boleta</button>
+
+<button type="button" onclick="imprimirTicket()">🧾 IMPRIMIR EN IMPRESORA TÉRMICA (80 mm)</button>
+
+<button type="button" onclick="imprimirTicketA4()">🖨 Imprimir en hoja A4 (opcional)</button>
+
+<p style="font-size:13px;line-height:1.5;margin:8px 0 14px">Para la impresora térmica, selecciona el papel <strong>80 mm</strong>, orientación <strong>vertical</strong>, escala <strong>100 %</strong> y <strong>1 página por hoja</strong> en la ventana de impresión. Desactiva “Ajustar a página”.</p>
+
+<button type="button" onclick="guardarPDF()">📄 Guardar boleta en PDF</button>
+
+</div>
+
+<div id="ticket" class="ticket" aria-label="Vista previa de boleta" style="display:none"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<script src="firebase-cloud.js"></script>
+<script src="app.js?v=20"></script>
+<script src="ticket_canvas.js?v=18"></script>
+<script src="pago-escaneado.js?v=5"></script>
+<script src="boleta-supermercado.js?v=11"></script><script>
+if('serviceWorker' in navigator){
+ navigator.serviceWorker.register('service-worker.js');
+}
+</script>
+</body>
+</html>
+<div id="ticket80" class="ticket80"></div>
+
+

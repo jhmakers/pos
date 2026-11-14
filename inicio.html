@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="estilos.css?v=15">
+<script src="tema.js?v=8" defer></script>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" id="iconoTiendaApple" href="icon-tienda.png">
+</head>
+
+<body onload="cargarInicio()">
+
+<header>
+<img id="logoTienda" class="logo">
+<h1 id="titulo">🌸 Tienda Artesanal</h1>
+</header>
+
+<div class="card">
+<button onclick="entrarAdmin()">⚙️ Admin</button>
+<button onclick="location='scanner.html'">📷 Escanear</button>
+<button onclick="location='control_pedidos.html'">📋 Pedidos</button>
+</div>
+
+<h2>Productos disponibles</h2>
+<input id="buscadorInicio" class="buscador" placeholder="🔎 Buscar por nombre o código" onkeyup="buscarInicio()">
+
+<div id="productosInicio" class="grid"></div>
+
+<button id="botonCarrito" class="boton-carrito-flotante" type="button" aria-label="Abrir carrito" aria-controls="panelCarrito" aria-expanded="false">🛒 <span id="cantidadCarrito" class="carrito-contador">0</span></button>
+<aside id="panelCarrito" class="panel-carrito" aria-label="Carrito de compras" hidden>
+ <div class="carrito-titulo"><h2>🛒 Mi carrito</h2><button type="button" id="cerrarCarrito" aria-label="Cerrar carrito">✕</button></div>
+ <div id="listaCarrito" class="lista-carrito"></div>
+ <div class="carrito-pie"><div class="carrito-total"><strong>Total a pagar</strong><strong id="totalCarrito">S/ 0.00</strong></div><div class="carrito-acciones"><button type="button" id="irPagarCarrito">💳 IR A PAGAR</button><button type="button" id="irEscanerCarrito">📷 IR AL ESCÁNER</button></div></div>
+</aside>
+
+<script src="offline-catalog.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<script src="firebase-cloud.js"></script>
+<script src="app.js?v=21"></script>
+<script src="carrito.js?v=3"></script>
+
+<script src="ticket_canvas.js"></script><script>
+if('serviceWorker' in navigator){
+ navigator.serviceWorker.register('service-worker.js');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="estilos.css?v=9">
+</head>
+
+<body onload="verificarAccesoAdmin(); cargarAdmin()">
+
+<header>
+<h1>🌸 PANEL ADMINISTRADOR</h1>
+</header>
+
+<div class="contenedor">
+
+<section class="tarjeta">
+<h2>⚙️ Configuración de tienda</h2>
+
+<label>Nombre de tienda</label>
+<input id="nombreTienda" placeholder="Nombre de la tienda">
+
+
+<label>Numero de contacto</label>
+<input id="contactoTienda" placeholder="Ejemplo: 999999999">
+
+<label>Contraseña del panel administrador</label>
+<input id="claveAdmin" type="password" placeholder="Cambiar contraseña">
+
+<label>Logo de tienda</label>
+<label style="margin-top:15px;display:block">Logo de aplicación PWA (icono del celular)</label>
+<input type="file" id="logoPWAInput" accept=".png,.jpg,.jpeg">
+<img id="logoPWAVista" class="preview">
+<p>Recomendado: imagen cuadrada 512x512 px</p>
+
+<input type="file" id="logoInput" accept=".png,.jpg,.jpeg,.svg">
+
+<img id="logoVista" class="preview">
+
+<div class="panel-colores">
+<h3>🎨 Colores de la tienda</h3>
+<p>Personaliza los colores de la tienda. Los cambios se muestran al instante.</p>
+<div class="opcion-color"><label for="colorFondo">Color del fondo</label><input type="color" id="colorFondo" value="#fff7fb" oninput="previsualizarColores()"></div>
+<div class="opcion-color"><label for="colorPrincipal">Color 2: todas las demás letras</label><input type="color" id="colorPrincipal" value="#d96c9d" oninput="previsualizarColores()"></div>
+<div class="opcion-color"><label for="colorProducto">Color 3: todos los recuadros (todas las páginas)</label><input type="color" id="colorProducto" value="#ffffff" oninput="previsualizarColores()"></div>
+<div class="opcion-color"><label for="colorDatos">Color 4: código, precio y textos pequeños</label><input type="color" id="colorDatos" value="#4d3040" oninput="previsualizarColores()"></div>
+<div id="vistaPreviaColores" class="vista-colores" aria-label="Vista previa de los colores elegidos">
+  <div class="vista-colores-titulo">👁️ VISTA PREVIA EN TIEMPO REAL</div>
+  <div class="vista-colores-pantalla">
+    <div class="vista-colores-encabezado">🌸 Mi tienda</div>
+    <div class="vista-colores-producto">
+      <div class="vista-colores-foto">🌷</div>
+      <strong>Producto de ejemplo</strong>
+      <span class="vista-colores-datos">Código: DM-001</span>
+      <span class="vista-colores-datos">Precio: S/ 25.00</span>
+      <div class="vista-colores-boton">VER PRODUCTO</div>
+    </div>
+    <div class="vista-colores-datos" style="font-size:12px;text-align:center">Vista previa: etiquetas y textos pequeños del administrador</div>
+    <div class="vista-colores-leyenda">Fondo: <b id="valorColorFondo">#FFF7FB</b> · Principal: <b id="valorColorPrincipal">#D96C9D</b> · Producto: <b id="valorColorProducto">#FFFFFF</b> · Texto: <b id="valorColorDatos">#4D3040</b></div>
+  </div>
+</div>
+<p id="estadoColores" role="status">Elige un color para ver el resultado antes de guardar.</p>
+<button type="button" class="boton-secundario" onclick="restaurarColores()">Restaurar colores originales</button>
+<small>Presiona GUARDAR CAMBIOS para mantenerlos en todos los dispositivos.</small>
+</div>
+<button onclick="guardarTienda()">GUARDAR CAMBIOS</button>
+
+</section>
+
+
+<section class="tarjeta">
+<h2>🛍️ Crear producto</h2>
+
+<label>Imagen del producto</label>
+<input type="file" id="productoInput" accept=".png,.jpg,.jpeg,.svg">
+
+<img id="productoVista" class="preview" alt="Imagen actual del producto">
+
+<div class="editor-transparencia" id="editorTransparencia">
+  <h3>🪄 Quitar fondo de la imagen</h3>
+  <p>Funciona con imágenes nuevas y con productos ya registrados. Edita un producto para modificar su foto actual.</p>
+  <button type="button" class="boton-secundario" onclick="abrirEditorTransparencia()">Editar fondo de la imagen</button>
+  <div id="herramientasTransparencia" hidden>
+    <p><strong>1.</strong> Toca un punto del fondo que quieras hacer transparente (normalmente blanco).</p>
+    <canvas id="lienzoTransparencia" role="img" aria-label="Vista previa del producto. Toca para elegir el color del fondo."></canvas>
+    <label for="toleranciaTransparencia">Tolerancia: <output id="valorToleranciaTransparencia">40</output></label>
+    <input type="range" id="toleranciaTransparencia" min="5" max="130" value="40" step="1" oninput="cambiarToleranciaTransparencia()">
+    <p class="ayuda-transparencia">Aumenta la tolerancia si quedan bordes. Redúcela si desaparecen partes del producto.</p>
+    <p id="estadoTransparencia" role="status"></p>
+    <button type="button" onclick="aplicarTransparenciaProducto()">USAR ESTA IMAGEN TRANSPARENTE</button>
+    <button type="button" class="boton-secundario" onclick="cancelarTransparenciaProducto()">Cancelar edición del fondo</button>
+  </div>
+  <small>La imagen original no se sustituirá hasta que pulses CREAR PRODUCTO o GUARDAR CAMBIOS. Se recomienda un fondo uniforme.</small>
+</div>
+
+<label>Nombre del producto</label>
+<input id="nombreProducto" placeholder="Ejemplo: Ramo de rosas">
+
+<label>Código de barras (opcional)</label>
+<div style="display:flex;gap:8px;align-items:center">
+<input id="codigoProducto" placeholder="Escanee o escriba un código">
+<button type="button" onclick="abrirEscanerProducto()">📷 Escanear</button>
+</div>
+<small>Si no coloca código, el sistema generará uno automáticamente.</small>
+
+<label>Precio</label>
+<input id="precioProducto" type="number" placeholder="S/. 25">
+
+<div class="codigo">
+Código generado:
+<strong id="codigoVista">Se generará automáticamente</strong>
+</div>
+
+<button onclick="crearProducto()">CREAR PRODUCTO</button>
+
+</section>
+
+
+<section class="tarjeta">
+<h2>📦 Productos registrados</h2>
+<input id="buscadorAdmin" class="buscador" placeholder="🔎 Buscar por nombre o código" onkeyup="buscarAdmin()">
+
+<div id="listaProductos"></div>
+
+</section>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<script src="firebase-cloud.js"></script>
+<script src="tema.js?v=8"></script>
+<script src="app.js"></script>
+<script src="transparencia-productos.js?v=6"></script>
+
+<script src="ticket_canvas.js"></script></body>
+</html>

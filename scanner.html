@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Escáner de productos</title>
+<link rel="stylesheet" href="estilos.css?v=13">
+<script src="tema.js?v=8" defer></script>
+<script src="https://unpkg.com/quagga/dist/quagga.min.js" defer></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" defer></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" defer></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js" defer></script>
+<script src="firebase-cloud.js" defer></script>
+<script src="app.js" defer></script>
+<script src="scanner-multiple.js?v=5" defer></script>
+<style>
+.escaneo-contenido{width:100%;max-width:800px;margin:0 auto;padding:12px}
+.escaneo-contenido .tarjeta{width:100%;max-width:none;margin:12px 0;background:var(--producto-fondo)}
+#scanner{position:relative;height:270px;overflow:hidden;border-radius:16px;background:#202020}
+#scanner video,#scanner canvas{width:100%!important;height:100%!important;object-fit:cover!important}
+.mira{position:absolute;inset:23% 9%;border:3px solid #46ee88;border-radius:10px;pointer-events:none;box-shadow:0 0 13px #1ce27b;z-index:2}
+#gatillo{width:100%;min-height:66px;border-radius:20px;font-size:21px;font-weight:800;touch-action:manipulation}
+#gatillo:disabled{opacity:.6}
+#pagarEscaneo{width:100%;margin-top:14px;min-height:56px;font-weight:800;font-size:17px;border-radius:14px}
+#pagarEscaneo:disabled{opacity:.5;cursor:not-allowed}
+.escaneo-ayuda{font-size:13px;color:var(--producto-datos-color)}
+.escaneo-fila{display:flex;align-items:center;gap:9px}
+.escaneo-fila input{flex:1;min-width:0}
+.escaneo-fila button{flex-shrink:0;padding:12px}
+#listaEscaneados{list-style:none;padding:0;margin:0}
+#listaEscaneados li{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid currentColor}
+#listaEscaneados li > div:not(.miniatura-escaneo){flex:1;text-align:left;min-width:0}
+.miniatura-escaneo{width:74px;height:74px;flex:0 0 74px;display:flex;align-items:center;justify-content:center;border-radius:12px;overflow:hidden;background:var(--producto-fondo,#fff);border:1px solid #9995}
+.miniatura-escaneo img{display:block;width:100%;height:100%;object-fit:contain}
+.miniatura-escaneo.sin-imagen{font-size:28px}
+@media(max-width:420px){.miniatura-escaneo{width:60px;height:60px;flex-basis:60px}#listaEscaneados li{gap:7px}.cantidad-controles{gap:4px}}
+#listaEscaneados small{display:block;color:var(--producto-datos-color);overflow-wrap:anywhere}
+.cantidad-controles{display:flex;align-items:center;gap:7px}
+.cantidad-controles button{padding:6px 10px;min-width:34px}
+.escaneo-pie{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+#resultado{overflow-wrap:anywhere;min-height:38px}
+/* Campo manual: contraste garantizado, incluso con colores personalizados. */
+#formularioManual #codigoManual{
+  background-color:#ffffff !important;
+  color:#171717 !important;
+  -webkit-text-fill-color:#171717 !important;
+  caret-color:#171717 !important;
+  border:2px solid #666 !important;
+  font-size:18px;
+  font-weight:600;
+  opacity:1;
+  color-scheme:light;
+}
+/* Código manual: ancho completo de la tarjeta. El botón no reduce el campo. */
+#formularioManual{
+  display:flex;flex-direction:column;align-items:stretch;
+  gap:8px;width:100%;max-width:none;margin-top:10px;
+}
+#formularioManual #codigoManual{
+  display:block;box-sizing:border-box;flex:none;
+  width:100% !important;max-width:none !important;min-width:0;
+  height:54px;min-height:54px;padding:12px 16px;
+  font-size:20px !important;line-height:1.3;
+  border-radius:12px;letter-spacing:.3px;
+}
+#formularioManual #agregarManual{
+  display:block;width:100%;max-width:none;
+  min-height:52px;padding:12px 18px;
+  font-size:17px;border-radius:12px;margin-top:0;
+}
+@media(max-width:600px){
+  .escaneo-contenido{padding:8px;}
+  #formularioManual #codigoManual{height:54px;min-height:54px;}
+}
+#formularioManual #codigoManual::placeholder{
+  color:#666666 !important;
+  -webkit-text-fill-color:#666666 !important;
+  opacity:1;
+}
+#formularioManual #codigoManual:focus{
+  outline:3px solid #2563eb;
+  outline-offset:1px;
+}
+</style>
+</head>
+<body>
+<header><h1>📷 Escáner de productos</h1></header>
+<main class="escaneo-contenido">
+<div id="estado" class="tarjeta" role="status" aria-live="polite">Preparando cámara...</div>
+<div id="scanner" aria-label="Vista de cámara para escanear códigos"><div class="mira"></div></div>
+<p class="escaneo-ayuda">🎯 Apunta el código al recuadro y pulsa el gatillo. Puedes repetirlo para añadir más productos.</p>
+<button type="button" id="gatillo">🎯 ESCANEAR PRODUCTO</button>
+<div id="resultado" class="tarjeta" role="status" aria-live="polite">Presiona el gatillo para añadir un producto.</div>
+<section class="tarjeta">
+<label for="codigoManual">Código manual (si la cámara no lo reconoce)</label>
+<form id="formularioManual" class="escaneo-fila"><input type="text" id="codigoManual" placeholder="Escribe o pega el código" autocomplete="off" inputmode="text" aria-label="Código de producto" required><button type="submit" id="agregarManual">➕ Añadir</button></form><p class="escaneo-ayuda">Puedes presionar Enter o pulsar Añadir. El producto debe estar registrado en Administración.</p>
+</section>
+<section class="tarjeta" id="seccionLista">
+<h2>🛍️ Productos del carrito y escáner</h2>
+<p id="totalUnidades" class="escaneo-ayuda">0 unidades</p>
+<ul id="listaEscaneados"><li>Todavía no hay productos.</li></ul>
+<div class="escaneo-pie"><strong id="totalEscaneo">Total: S/ 0.00</strong><button type="button" id="vaciarEscaneo">🗑 Vaciar lista</button></div>
+<button type="button" id="pagarEscaneo" disabled aria-label="Ir al panel de boletas con los productos escaneados">💳 PAGAR · GENERAR BOLETA</button>
+</section>
+<button type="button" onclick="location.href='inicio.html'">⬅ Volver a la tienda</button>
+</main>
+</body>
+</html>
